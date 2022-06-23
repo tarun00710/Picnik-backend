@@ -2,20 +2,48 @@ const bcrypt = require('bcryptjs/dist/bcrypt')
 const express =  require('express')
 const router = express.Router()
 const {User} = require('../Model/userModel')
-
+const cloudinary = require('cloudinary').v2
 
 //create user
-
-router.route('/registration').post(async(req,res) => {
-    const {name,username,email,password,bio} = req.body
+router.route('/').get(async(req,res)=>{
     try {
-        const createUser = new User({
+        console.log("hello")
+    } catch (error) {
+        console.log(error.message)
+    }
+    
+})
+
+router.route('/signup').post(async(req,res) => {
+    const {name,username,email,password,bio} = req.body
+    const file = req?.files?.photo
+    try {
+        let defaultUser = {
             name : name,
             username:username,
             email: email,
             password : password,
             bio : bio
-        })
+        }
+        if(file){
+            await cloudinary.uploader.upload(file.tempFilePath , async(error,result) => {
+                if(result){
+                    console.log(result)
+                    defaultUser = {
+                        ...defaultUser,avatar:result.secure_url
+                    }
+                }else{
+                    console.log("error uploading photo")
+                    res.status(500).json({
+                        status: false,
+                        message: "image uploadation to cloudinary failed",
+                        errorDetail: err,
+                      });
+                }
+            })  
+        }
+        console.log(defaultUser)
+        const createUser = new User(defaultUser)
         const user = await createUser.save()
         if(user){
             res.json({success:true,user})

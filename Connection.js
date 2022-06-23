@@ -4,13 +4,11 @@ const mongooseURL =
 
 const ConnectionDB = async () => {
   try {
-    const Connection = await mongoose.connect(mongooseURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    
-    });
-    if (Connection) console.log("connected to DB");
-    else console.log("Couldn't connect to MongoDB");
+    const Connection = await mongoose.connect(mongooseURL);
+    if (Connection) 
+      console.log("connected to DB");
+    else 
+      console.log("Couldn't connect to MongoDB");
   } catch (error) {
     console.log(error);
   }

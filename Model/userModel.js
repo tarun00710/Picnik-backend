@@ -3,49 +3,6 @@ const mongoose =  require('mongoose');
 const {Schema,model} = mongoose;
 
 
-const commentSchema = new Schema({
-    message:{
-        type:String
-    },
-    timeStamp:{
-        type:Date
-    },
-    like:{
-        type:Number
-    },
-    dislike:{
-        type:Number
-    },
-    name:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
-    }
-}, {
-    timestamps:true
-})
-
-
-const postSchema = new Schema({
-    postContent:{
-        type:String,
-        required:true
-    },
-    like:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
-    }],
-    dislike:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
-    }],
-    comments:[commentSchema],
-    timeStamp:{
-        type:Date
-    }
-})
-
-
-
 const userSchema = new Schema({
     name:{
         type:String,
@@ -67,7 +24,7 @@ const userSchema = new Schema({
         type:String,
         required:true
     },
-    posts:[postSchema],
+    posts:[{type:mongoose.Schema.Types.ObjectId,ref:"Post"}],
     followings:[{
         type:mongoose.Schema.Types.ObjectId,ref:"User"
     }],
@@ -80,6 +37,8 @@ const userSchema = new Schema({
         type:String,
         required:true
     },
+    likedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+    notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     
 
 })
