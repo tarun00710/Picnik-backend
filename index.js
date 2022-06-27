@@ -3,15 +3,18 @@ const App = express();
 const { ConnectionDB } = require('./Connection');
 const port = process.env.PORT || 5000;
 const fileupload = require('express-fileupload')
-
+const cors = require('cors')
 ConnectionDB();
 
 const bodyParser = require('body-parser');
 
+App.use(cors());
+
+App.use(bodyParser.json())
+
 App.use(fileupload({
     useTempFiles:true
 }))
-App.use(bodyParser.json())
 
 App.get('/',(req,res) => res.send("hello peeps"))
 

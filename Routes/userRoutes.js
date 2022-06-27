@@ -60,8 +60,11 @@ router.route('/signup').post(async(req,res) => {
 router.route('/login').post(async(req,res) => {
     try {
         const {email,password} = req.body
+        console.log(email,password)
         const checkUser = await User.find({email:email})
-        const checkPassword = bcrypt.compare(checkUser.password,password)
+        console.log(checkUser[0].password)
+        const checkPassword = await bcrypt.compare(password,checkUser[0].password)
+        console.log(checkPassword)
         if(checkPassword){
             return res.json({success:true,checkUser})
         }
@@ -100,9 +103,9 @@ router.route('/:userId/follow/:followId').post(async(req,res) =>{
 router.route('/:uid').get(async(req,res) =>{
     try {
         const {uid} = req.params
-        const getDetail = await User.findById(uid).populate("followings followers").select("followings followers -_id")
+        const getDetail = await User.findById(uid).populate("followings followers posts").select("followings followers posts -_id")
         if(getDetail){
-            res.json({success:true,getDetail})
+            res.status(201).json({success:true,getDetail})
         }else{
             res.json({success:false,message:"cant retrieve data"})
         }
