@@ -64,7 +64,7 @@ router
       const checkAlreadyLiked = getPost.like.includes(clientId)
       const checkAlreadyDisliked = getPost.dislike.includes(clientId)
       if(checkAlreadyLiked){
-        return res.json({ success: true, message:"already liked by user" });
+        return res.json({ success: false, message:"already liked by user" });
       }
       getPost.like = getPost.like.concat(clientId)
       if(checkAlreadyDisliked)
@@ -119,14 +119,27 @@ router
   .post(async (req, res) => {
     try {
       const { clientId, postId } = req.params;
-      console.log(clientId,postId)
       const getPost = await Post.findById(postId);
-      if(!getPost.dislike.includes(clientId))
-        getPost.dislike = getPost.dislike.concat(clientId)
-      if(getPost.like.includes(clientId))
-        getPost.like = getPost.like.filter((client) => client != clientId)  
+      const checkAlreadyLiked = getPost.like.includes(clientId)
+      const checkAlreadyDisliked = getPost.dislike.includes(clientId)
+      if(checkAlreadyDisliked)
+        getPost.dislike = getPost.dislike.filter((client) => client!=clientId )
+      if(checkAlreadyLiked){
+        return res.json({ success: false, message:"already liked by user" });
+      }
+      getPost.like = getPost.like.concat(clientId)
+      
       await getPost.save();
       return res.json({ success: true, getPost });
+      // const { clientId, postId } = req.params;
+      // console.log(clientId,postId)
+      // const getPost = await Post.findById(postId);
+      // if(!getPost.dislike.includes(clientId))
+      //   getPost.dislike = getPost.dislike.concat(clientId)
+      // if(getPost.like.includes(clientId))
+      //   getPost.like = getPost.like.filter((client) => client != clientId)  
+      // await getPost.save();
+      // return res.json({ success: true, getPost });
     } catch (error) {
       console.log(error);
     }
@@ -136,21 +149,19 @@ router
 router.route("/:userId/removePost/:postId").post(async(req, res) => {
   try {
     const { userId, postId } = req.params;
+    console.log(userId,postId)
     const getPost = await Post.findById(postId);
-
+    console.log(getPost)
     if(String(getPost.author) === userId)
       {
         const updateUserPost = await User.findById(userId)
         console.log(updateUserPost.posts,typeof (updateUserPost.posts[0]))
         updateUserPost.posts = updateUserPost.posts.filter((post) => String(post) != postId )
         await updateUserPost.save()
-        const getUpdatePost = await Post.findOneAndDelete(postId, function(err,docs){
-          if(err)
-            return res.json({ success: false, message: "failed to delete"})
-        })
-        
+        const getUpdatePost = await Post.findOneAndRemove(postId)
+        console.log(getUpdatePost)
         if(getUpdatePost)
-        return res.json({ success: false, getUpdatePost})
+        return res.json({ success: true, getUpdatePost})
       }
       return res.json({success:false,message:"Only owner can delete"})
   } catch (error) {

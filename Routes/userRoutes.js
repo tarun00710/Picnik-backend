@@ -1,9 +1,9 @@
-const bcrypt = require('bcryptjs/dist/bcrypt')
+const bcrypt = require('bcryptjs')
 const express =  require('express')
 const router = express.Router()
 const {User} = require('../Model/userModel')
 const cloudinary = require('cloudinary').v2
-
+const {userCheckHandler} = require('../Middleware/userCheckHandler')
 //create user
 router.route('/').get(async(req,res)=>{
     try {
@@ -14,7 +14,7 @@ router.route('/').get(async(req,res)=>{
     
 })
 
-router.route('/signup').post(async(req,res) => {
+router.route('/signup').post(userCheckHandler,async(req,res) => {
     const {name,username,email,password,bio} = req.body
     const file = req?.files?.photo
     try {
@@ -61,9 +61,9 @@ router.route('/login').post(async(req,res) => {
     try {
         const {email,password} = req.body
         console.log(email,password)
-        const checkUser = await User.find({email:email})
-        console.log(checkUser[0].password)
-        const checkPassword = await bcrypt.compare(password,checkUser[0].password)
+        const checkUser = await User.findOne({email:email})
+        console.log(checkUser)
+        const checkPassword = await bcrypt.compare(password,checkUser.password)
         console.log(checkPassword)
         if(checkPassword){
             return res.json({success:true,checkUser})
@@ -78,7 +78,7 @@ router.route('/login').post(async(req,res) => {
 
 //for following
 
-router.route('/:userId/follow/:followId').post(async(req,res) =>{
+router.route('/:userId/follow/:followId').post(async(req,res) => {
     try {
         const {userId,followId} = req.params
         const findActiveUser = await User.findById(userId);
@@ -97,13 +97,27 @@ router.route('/:userId/follow/:followId').post(async(req,res) =>{
         console.log(error)
     }
 })
+//getting user posts
+router.route('/:uid/posts').get(async(req,res) =>{
+    try {
+        const {uid} = req.params
+        const getDetail = await User.findById(uid).populate("posts").select("posts -_id")
+        if(getDetail){
+            res.status(201).json({success:true,getDetail})
+        }else{
+            res.json({success:false,message:"cant retrieve data"})
+        }
+    } catch (error) {
+        console.log(error)
+    }
+})
 
 //getting follower following details
 
 router.route('/:uid').get(async(req,res) =>{
     try {
         const {uid} = req.params
-        const getDetail = await User.findById(uid).populate("followings followers posts").select("followings followers posts -_id")
+        const getDetail = await User.findById(uid).populate("followings followers").select("followings followers -_id")
         if(getDetail){
             res.status(201).json({success:true,getDetail})
         }else{
