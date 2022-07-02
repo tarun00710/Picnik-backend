@@ -73,9 +73,48 @@ router.route('/login').post(async(req,res) => {
         console.log(error)
     }
 })
+//edit user details
 
-
-
+router.route('/editprofile/:userId').post(async(req,res)=>{
+    try {
+        const {userId} =  req.params
+        const {name,username,bio} = req.body
+        // let getCurrentUser = await User.findById(userId)
+        // console.log(getCurrentUser)
+        let newavatar = ""
+        const file = req?.files?.photo
+        if(file){
+            await cloudinary.uploader.upload(file.tempFilePath,async(error,result)=>{
+                if(result)
+                {
+                    newavatar=result.secure_url
+                }
+                else{
+                console.log("error uploading photo")
+                res.status(500).json({
+                    status: false,
+                    message: "image uploadation to cloudinary failed",
+                    errorDetail: err,
+                  });
+                }
+            })
+        }
+        let updateUser = await User.findByIdAndUpdate(userId,{
+            $set:{
+                name:name,
+                bio:bio,
+                username:username,
+                avatar:newavatar
+            }
+        },{
+            new: true
+          })
+        console.log(newavatar,updateUser)
+        return res.json({success:true,updateUser})
+    } catch (error) {
+        console.log(error.message)
+    }
+})
 //for following
 
 router.route('/:userId/follow/:followId').post(async(req,res) => {

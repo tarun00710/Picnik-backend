@@ -231,5 +231,39 @@ router
       console.log(error);
     }
   });
+  //unfollow
+
+  router.route("/:userId/unfollow/:clientId").post(async(req,res)=>{
+    try {
+      const {userId,clientId} = req.params;
+      console.log(userId,clientId)
+      const getUser = await User.findById(userId)
+      console.log(getUser)
+      getUser.followings = getUser.followings.filter((userid) => String(userid )!== String(clientId))
+      console.log(getUser)
+      await getUser.save()
+      const getUpdatedUser = await User.findById(userId).populate("followings")
+      return res.json({success:true,getUpdatedUser})
+    } catch (error) {
+      console.log(error)
+    }
+  })
+
+  //remove follower
+  router.route("/:userId/removefollower/:clientId").post(async(req,res)=>{
+    try {
+      const {userId,clientId} = req.params;
+      console.log(userId,clientId)
+      const getUser = await User.findById(userId)
+      console.log(getUser)
+      getUser.followings = getUser.followers.filter((userid) => String(userid )!== String(clientId))
+      console.log(getUser)
+      await getUser.save()
+      const getUpdatedUser = await User.findById(userId).populate("followers")
+      return res.json({success:true,getUpdatedUser})
+    } catch (error) {
+      console.log(error)
+    }
+  })
 
 module.exports = router;
