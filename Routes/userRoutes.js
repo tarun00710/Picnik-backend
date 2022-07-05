@@ -77,6 +77,7 @@ router.route('/login').post(async(req,res) => {
 
 router.route('/editprofile/:userId').post(async(req,res)=>{
     try {
+        console.log("hello2")
         const {userId} =  req.params
         const {name,username,bio} = req.body
         // let getCurrentUser = await User.findById(userId)

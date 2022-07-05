@@ -1,7 +1,7 @@
 const express = require('express');
 const App = express();
 const { ConnectionDB } = require('./Connection');
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 const fileupload = require('express-fileupload')
 const cors = require('cors')
 ConnectionDB();
