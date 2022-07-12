@@ -75,7 +75,7 @@ router.route('/login').post(async(req,res) => {
 })
 //edit user details
 
-router.route('/editprofile/:userId').post(async(req,res)=>{
+router.route('/edit/:userId').post(async(req,res)=>{
     try {
         console.log("hello2")
         const {userId} =  req.params
@@ -110,7 +110,6 @@ router.route('/editprofile/:userId').post(async(req,res)=>{
         },{
             new: true
           })
-        console.log(newavatar,updateUser)
         return res.json({success:true,updateUser})
     } catch (error) {
         console.log(error.message)

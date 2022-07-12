@@ -193,11 +193,8 @@ router
   router.route("/:userId/unfollow/:clientId").post(async(req,res)=>{
     try {
       const {userId,clientId} = req.params;
-      console.log(userId,clientId)
       const getUser = await User.findById(userId)
-      console.log(getUser)
       getUser.followings = getUser.followings.filter((userid) => String(userid )!== String(clientId))
-      console.log(getUser)
       await getUser.save()
       const getUpdatedUser = await User.findById(userId).populate("followings")
       return res.json({success:true,getUpdatedUser})
@@ -207,13 +204,11 @@ router
   })
 
   //remove follower
-  router.route("/:userId/removefollower/:clientId").post(async(req,res)=>{
+  router.route("/:userId/removefollower/:clientId").post(async(req,res)=> {
     try {
       const {userId,clientId} = req.params;
       const getUser = await User.findById(userId)
-      console.log(getUser)
-      getUser.followings = getUser.followers.filter((userid) => String(userid )!== String(clientId))
-      console.log(getUser)
+      getUser.followers = getUser.followers.filter((userid) => String(userid )!== String(clientId))
       await getUser.save()
       const getUpdatedUser = await User.findById(userId).populate("followers")
       return res.json({success:true,getUpdatedUser})
@@ -221,5 +216,76 @@ router
       console.log(error)
     }
   })
+  //get posts comment
+   router.route('/:postId/comments').get(async(req,res)=>{
+    try {
+      const {postId} = req.params
+      const getPost = await Post.findById(postId).populate({
+        path:"comments",
+        populate:{
+          path:"author"
+        }
+      })
+      return res.json({success:true,getPost})
+    } catch (error) {
+      console.log(error.message)
+    }
+   })
+
+
+//getuserfollowing post
+ router.route('/:userId/feedposts').get(async(req,res) => {
+   try {
+    const { userId } = req.params
+     const getuserfollowing = await User.findById(userId).populate({
+      path:"followings",
+      populate:{
+        path:"posts",
+          populate:{
+            path:"author"
+          
+        }
+      }
+     })
+     let allpost = []
+     const getAllPosts = getuserfollowing.followings?.map((following) => {
+      // console.log(following.posts)
+      allpost = [...allpost,...following.posts] //rest operator
+      console.log(following.posts)
+      return following
+    })
+    //   console.log(getAllPosts)
+      // return person.post?.map((post) => {
+      //   allpost = [...allpost,post]
+      //   return post
+      // })
+    //  })
+    //  res.send(getAllPosts)
+     res.json({success:true,allpost})
+   } catch (error) {
+      console.log(error)
+   }
+ })
+
+router.route('/:suggestions').get(async(req,res)=>{
+  try {
+    const {suggestions} = req.params
+    let response = await User.find({
+      "$or": [
+        { username : {$regex  : suggestions}}
+      ]
+    })
+    if(response){
+      res.status(201).json({success:true,response})
+    }
+  } catch (error) {
+    console.log(error.message)
+  }
+})
+
+
+
+
+
 
 module.exports = router;
